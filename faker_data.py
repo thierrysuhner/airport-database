@@ -52,7 +52,7 @@ def insert_data():
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
         cur = conn.cursor()
         print(f"Verbindung zu PostgreSQL hergestellt. Starte Generierung von {NUM_ROWS} Datensätzen...")
-
+    
         # --- LEVEL 1: Entitäten ohne Fremdschlüssel-Abhängigkeiten ---
 
         print("\n--- Generiere Entitäten (Level 1) ---")
@@ -61,12 +61,14 @@ def insert_data():
         # 1. Airline
         print("  - Airline...")
         for _ in range(NUM_ROWS):
-            iata = generate_airport_iata_code(iata_codes) 
+            iata = generate_airport_iata_code(iata_codes)  # benutzt die Funktion
+            name = fake.company().encode('ascii', errors='ignore').decode('ascii')
+            land = fake.country().encode('ascii', errors='ignore').decode('ascii')
             cur.execute("""
                 INSERT INTO Airline (IATACode, Name, Ursprungsland) 
                 VALUES (%s, %s, %s) 
                 RETURNING IATACode;
-            """, (iata.strip(), fake.company(), fake.country())) # <-- SICHERHEITSMASSNAHME FÜR CHAR(3)
+            """, (iata, name, land))
             pks['Airline'].append(cur.fetchone()[0])
             
         # 2. Terminal
@@ -103,11 +105,15 @@ def insert_data():
         print("  - Flughafen...")
         for _ in range(NUM_ROWS):
             iata = generate_airport_iata_code(iata_codes)
+            name = (fake.city_name() + ' International Airport').encode('ascii', errors='ignore').decode('ascii')
+            land = fake.country().encode('ascii', errors='ignore').decode('ascii')
+            stadt = fake.city().encode('ascii', errors='ignore').decode('ascii')
+
             cur.execute("""
                 INSERT INTO Flughafen (IATACode, Name, Land, Stadt) 
                 VALUES (%s, %s, %s, %s) 
                 RETURNING IATACode;
-            """, (iata.strip(), fake.city_name() + ' International Airport', fake.country(), fake.city()))
+            """, (iata, name, land, stadt))
             pks['Flughafen'].append(cur.fetchone()[0])
             
         # 6. Kontrolle
