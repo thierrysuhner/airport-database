@@ -405,10 +405,9 @@ def insert_data():
                 buchungsklasse = random.choice(string.ascii_uppercase[:4]) # A, B, C oder D
                 sitzplatz_nummer = str(random.randint(1, 50)) + random.choice(string.ascii_uppercase[:6])
                 cur.execute("""
-                    INSERT INTO bucht (PassagierID, FlugID, TicketNummer, Buchungsklasse, BuchungsStatus, SitzplatzNummer) 
+                    INSERT INTO bucht (TicketNummer, PassagierID, FlugID, Buchungsklasse, BuchungsStatus, SitzplatzNummer) 
                     VALUES (%s, %s, %s, %s, %s, %s) 
-                    ON CONFLICT (PassagierID, FlugID) DO NOTHING;
-                """, (passagier_id, flug_id, fake.uuid4(), buchungsklasse, random.choice(['Gebucht', 'Bestätigt', 'Annuliert']), sitzplatz_nummer))
+                """, (fake.uuid4(), passagier_id, flug_id, buchungsklasse, random.choice(['Gebucht', 'Bestätigt', 'Annuliert']), sitzplatz_nummer))
 
         # arbeitetAn (MitarbeiterStatus IN)
         print("  - arbeitetAn...")
