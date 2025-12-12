@@ -34,7 +34,7 @@ Diese Parameter müssen ähnlich wie im Jupyter-Notebook ganz zuoberst im Python
 Zusätzlich kann hier mittels der `NUM_ROWS` Variable bestimmt werden, wie viele Dummy-Daten pro Relation eingefügt werden sollen von Faker.
 
 
-# Team
+# Team – Gruppe 10
 * Thierry Suhner
 * Karla Ruggaber
 * Lukas Kapferer

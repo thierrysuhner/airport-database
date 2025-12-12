@@ -4,7 +4,7 @@ import string
 from faker import Faker
 from datetime import datetime, timedelta
 
-# --- 1. Datenbank-Konfiguration (BITTE ANPASSEN) ---
+# --- Datenbank-Konfiguration (BITTE ANPASSEN) ---
 DB_NAME = "airportmanagementsystem"
 DB_USER = "thierrysuhner" 
 DB_PASSWORD = "1234"      
@@ -12,7 +12,7 @@ DB_HOST = "localhost"
 DB_PORT = "5432"
 NUM_ROWS = 200
 
-# Faker initialisieren, z.B. für deutsche Daten
+# Faker initialisieren
 fake = Faker('de_DE')
 
 # Listen zur Speicherung der generierten Primary Keys (für Foreign Keys)
@@ -24,7 +24,7 @@ pks = {
 }
 iata_codes = set() # Set zur Sicherstellung eindeutiger IATA-Codes
 
-# --- 2. Korrigierte Hilfsfunktionen zur Datengenerierung ---
+# Hilfsfunktionen zur Datengenerierung
 
 def generate_airport_iata_code(existing_codes):
     """Generiert einen eindeutigen 3-stelligen IATA-Code (A-Z)."""
@@ -53,7 +53,7 @@ def normalize(text):
         text = text.replace(src, tgt)
     return text
 
-# --- 3. Verbindung und Datenimport ---
+# Verbindung und Datenimport
 
 def insert_data():
     conn = None
@@ -63,15 +63,14 @@ def insert_data():
         cur = conn.cursor()
         print(f"Verbindung zu PostgreSQL hergestellt. Starte Generierung von {NUM_ROWS} Datensätzen...")
     
-        # --- LEVEL 1: Entitäten ohne Fremdschlüssel-Abhängigkeiten ---
+        # --- Entitäten ohne Fremdschlüssel-Abhängigkeiten ---
 
-        print("\n--- Generiere Entitäten (Level 1) ---")
+        print("\n--- Generiere Entitäten ---")
         
-        # 1. Airline (IATACode ~ '^[A-Z]{3}$')
-        # 1. Airline
+        # Airline
         print("  - Airline...")
         for _ in range(NUM_ROWS):
-            iata = generate_airport_iata_code(iata_codes)  # benutzt die Funktion
+            iata = generate_airport_iata_code(iata_codes)
             name = normalize(fake.company()).encode('ascii', errors='ignore').decode('ascii')
             land = normalize(fake.country()).encode('ascii', errors='ignore').decode('ascii')
             cur.execute("""
@@ -81,7 +80,7 @@ def insert_data():
             """, (iata, name, land))
             pks['Airline'].append(cur.fetchone()[0])
             
-        # 2. Terminal
+        # Terminal
         print("  - Terminal...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -91,7 +90,7 @@ def insert_data():
             """, (f'T{i+1:02d}', random.randint(500, 5000)))
             pks['Terminal'].append(cur.fetchone()[0])
 
-        # 3. Stellflaeche
+        # Stellflaeche
         print("  - Stellflaeche...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -101,7 +100,7 @@ def insert_data():
             """, (f'S{i+1:03d}', random.choice(['General Aviation', 'Cargo', 'Maintenance']), random.uniform(500, 5000)))
             pks['Stellflaeche'].append(cur.fetchone()[0])
 
-        # 4. Passagier
+        # Passagier
         print("  - Passagier...")
         for _ in range(NUM_ROWS):
             cur.execute("""
@@ -111,7 +110,7 @@ def insert_data():
             """, (fake.date_of_birth(minimum_age=18, maximum_age=80), fake.first_name(), fake.last_name()))
             pks['Passagier'].append(cur.fetchone()[0])
 
-        # 5. Flughafen (IATACode ~ '^[A-Z]{3}$')
+        # Flughafen
         print("  - Flughafen...")
         for _ in range(NUM_ROWS):
             iata = generate_airport_iata_code(iata_codes)
@@ -126,7 +125,7 @@ def insert_data():
             """, (iata, name, land, stadt))
             pks['Flughafen'].append(cur.fetchone()[0])
             
-        # 6. Kontrolle
+        # Kontrolle
         print("  - Kontrolle...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -136,7 +135,7 @@ def insert_data():
             """, (f'K{i+1:02d}', random.randint(100, 1000)))
             pks['Kontrolle'].append(cur.fetchone()[0])
 
-        # 7. Flug
+        # Flug
         print("  - Flug...")
         for i in range(NUM_ROWS):
             abflug = fake.date_time_this_year(before_now=False, after_now=True)
@@ -148,7 +147,7 @@ def insert_data():
             """, (f'FL{i+1:04d}', fake.word(ext_word_list=['Boeing 737', 'Airbus A320', 'Embraer 190']), abflug, ankunft))
             pks['Flug'].append(cur.fetchone()[0])
 
-        # 8. Piste (PistenStatus IN, Oberflaechenart IN, ILSKategorie >= 1 AND <= 3)
+        # Piste
         print("  - Piste...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -158,7 +157,7 @@ def insert_data():
             """, (f'P{i+1:02d}', random.uniform(1500, 4500), random.choice(['frei', 'besetzt', 'in Wartung', 'gesperrt']), random.choice(['Asphalt', 'Gras']), random.randint(1, 3)))
             pks['Piste'].append(cur.fetchone()[0])
 
-        # 9. Gate (GateNummer ~ '^[A-Z][0-9]{2}$', GateKategorie IN, GateStatus IN)
+        # Gate
         print("  - Gate...")
         for _ in range(NUM_ROWS):
             gate_num = random.choice(string.ascii_uppercase) + str(random.randint(10, 99))
@@ -169,7 +168,7 @@ def insert_data():
             """, (gate_num, random.choice(['Jetway', 'Bus', 'Fuss']), random.choice(['frei', 'besetzt', 'gesperrt'])))
             pks['Gate'].append(cur.fetchone()[0])
             
-        # 10. Mitarbeiter
+        # Mitarbeiter
         print("  - Mitarbeiter...")
         for _ in range(NUM_ROWS):
             cur.execute("""
@@ -179,7 +178,7 @@ def insert_data():
             """, (normalize(fake.first_name()), normalize(fake.last_name()), fake.date_of_birth(minimum_age=20, maximum_age=65), fake.street_address(), fake.postcode(), fake.city()))
             pks['Mitarbeiter'].append(cur.fetchone()[0])
             
-        # 11. Flaechennutzer
+        # Flaechennutzer
         print("  - Flaechennutzer...")
         for _ in range(NUM_ROWS):
             cur.execute("""
@@ -189,7 +188,7 @@ def insert_data():
             """, (normalize(fake.company()), random.choice(['Airline', 'Retail', 'Service', 'Gastro']), fake.street_address(), fake.postcode(), fake.city(), fake.phone_number()))
             pks['Flaechennutzer'].append(cur.fetchone()[0])
             
-        # 12. Fahrzeug (Herstellungsjahr ~ '^[0-9]{4}$', FahrzeugStatus IN)
+        # Fahrzeug
         print("  - Fahrzeug...")
         for _ in range(NUM_ROWS):
             year = str(random.randint(2010, 2023))
@@ -200,7 +199,7 @@ def insert_data():
             """, (random.choice(['einsatzfähig', 'in Nutzung', 'in Wartung']), year, random.choice(['Follow-Me-Car', 'Gepäckschlepper', 'Tankfahrzeug']), fake.license_plate()))
             pks['Fahrzeug'].append(cur.fetchone()[0])
             
-        # 13. Parking (ParkhausKategorie IN, Auslastung >= 0 AND <= 100)
+        # Parking
         print("  - Parking...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -210,7 +209,7 @@ def insert_data():
             """, (f'P{i+1}', random.choice(['Kurzzeit', 'Langzeit', 'Valet', 'Spezial']), random.randint(100, 5000), random.uniform(0.1, 5.0), random.uniform(10.0, 95.0)))
             pks['Parking'].append(cur.fetchone()[0])
 
-        # 14. Ladenflaeche
+        # Ladenflaeche
         print("  - Ladenflaeche...")
         for i in range(NUM_ROWS):
             cur.execute("""
@@ -220,7 +219,7 @@ def insert_data():
             """, (random.uniform(20, 500), random.choice(['Shop', 'Restaurant', 'Boutique', 'Kiosk']), f'L{i+1:03d}'))
             pks['Ladenflaeche'].append(cur.fetchone()[0])
 
-        # 15. Gepaeck (GepaeckKategorie IN, Gewicht >= 0)
+        # Gepaeck 
         print("  - Gepaeck...")
         for _ in range(NUM_ROWS):
             cat = random.choice(['Handgepaeck klein', 'Handgepaeck gross', 'Aufgabegepaeck', 'Sperrgut'])
@@ -232,11 +231,11 @@ def insert_data():
             """, (cat, weight))
             pks['Gepaeck'].append(cur.fetchone()[0])
 
-        # --- LEVEL 2: Sub-Entitäten und Relationen (FKs) ---
+        # --- Sub-Entitäten und Relationen (FKs) ---
         
-        print("\n--- Generiere Sub-Entitäten und Relationen (Level 2) ---")
+        print("\n--- Generiere Sub-Entitäten und Relationen ---")
         
-        # 16. SecurityKontrolle (eingesetzteScanner IN)
+        # SecurityKontrolle
         print("  - SecurityKontrolle...")
         kontrolle_pks = pks['Kontrolle'].copy()
         random.shuffle(kontrolle_pks)
@@ -247,13 +246,13 @@ def insert_data():
                 VALUES (%s, %s);
             """, (pk, random.choice(['2D', '3D'])))
 
-        # 17. Zollkontrolle
+        # Zollkontrolle
         print("  - Zollkontrolle...")
         zoll_kontrolle_pks = kontrolle_pks[NUM_ROWS // 3 : 2 * NUM_ROWS // 3]
         for pk in zoll_kontrolle_pks:
             cur.execute("INSERT INTO Zollkontrolle (KontrolleID) VALUES (%s);", (pk,))
 
-        # 18. Passkontrolle
+        # Passkontrolle
         print("  - Passkontrolle...")
         pass_kontrolle_pks = kontrolle_pks[2 * NUM_ROWS // 3:]
         for pk in pass_kontrolle_pks:
@@ -262,7 +261,7 @@ def insert_data():
                 VALUES (%s, %s);
             """, (pk, random.choice([True, False])))
 
-        # 19. Reisedokument (Typ IN)
+        # Reisedokument
         print("  - Reisedokument...")
         for passagier_id in pks['Passagier']:
             num_docs = random.randint(1, 2)
@@ -275,7 +274,7 @@ def insert_data():
                     ON CONFLICT (ReisedokumentNummer) DO NOTHING;
                 """, (doc_num + str(i), passagier_id, typ))
                 
-        # 20. MitarbeiterTelefon
+        # MitarbeiterTelefon
         print("  - MitarbeiterTelefon...")
         for mitarbeiter_id in pks['Mitarbeiter']:
             for _ in range(random.randint(1, 3)): 
@@ -285,7 +284,7 @@ def insert_data():
                     ON CONFLICT (Telefonnummer) DO NOTHING;
                 """, (fake.phone_number(), mitarbeiter_id, random.choice(['Mobil', 'Festnetz', 'Arbeit'])))
 
-        # 21. nutztAbflugGate & 22. nutztAnkunftGate (Nutzungsende > Nutzungsbeginn)
+        # utztAbflugGate & nutztAnkunftGate
         print("  - nutztAbflugGate & nutztAnkunftGate...")
         for flug_id in pks['Flug']:
             gate_abflug = get_random_pk('Gate')
@@ -311,7 +310,7 @@ def insert_data():
                 ON CONFLICT (FlugID, GateID) DO NOTHING;
             """, (flug_id, gate_ankunft, ankunft_start, ankunft_ende))
             
-        # 23. durchgeführtIn
+        # durchgeführtIn
         print("  - durchgeführtIn...")
         for kontrolle_id in pks['Kontrolle']:
             for _ in range(random.randint(1, 2)):
@@ -322,7 +321,7 @@ def insert_data():
                     ON CONFLICT (KontrolleID, TerminalID) DO NOTHING;
                 """, (kontrolle_id, terminal_id))
 
-        # 24. aufgegebenFuer (Gepaeckstatus IN)
+        # aufgegebenFuer
         print("  - aufgegebenFuer...")
         for gepaeck_id in pks['Gepaeck']:
             flug_id = get_random_pk('Flug')
@@ -333,7 +332,7 @@ def insert_data():
                 ON CONFLICT (GepaeckID, FlugID) DO NOTHING;
             """, (gepaeck_id, flug_id, status))
 
-        # 25. landetIn & 26. startetVon
+        # landetIn & startetVon
         print("  - landetIn & startetVon...")
         for flug_id in pks['Flug']:
             iata_ankunft = get_random_pk('Flughafen')
@@ -353,7 +352,7 @@ def insert_data():
                 ON CONFLICT (FlugID, IATACode) DO NOTHING;
             """, (flug_id, iata_abflug.strip()))
 
-        # 27. nutztPisteLandung & 28. nutztPisteStart
+        # nutztPisteLandung & nutztPisteStart
         print("  - nutztPisteLandung & nutztPisteStart...")
         for flug_id in pks['Flug']:
             piste_landung = get_random_pk('Piste')
@@ -376,7 +375,7 @@ def insert_data():
                 ON CONFLICT (FlugID, PistenID) DO NOTHING;
             """, (flug_id, piste_start, zeit_ende))
             
-        # 29. zugeordnetZu
+        # zugeordnetZu
         print("  - zugeordnetZu...")
         for gate_id in pks['Gate']:
             terminal_id = get_random_pk('Terminal')
@@ -386,7 +385,7 @@ def insert_data():
                 ON CONFLICT (GateID, TerminalID) DO NOTHING;
             """, (gate_id, terminal_id))
 
-        # 30. hatGepaeck
+        # hatGepaeck
         print("  - hatGepaeck...")
         for passagier_id in pks['Passagier']:
             for _ in range(random.randint(0, 3)):
@@ -398,7 +397,7 @@ def insert_data():
                         ON CONFLICT (PassagierID, GepaeckID) DO NOTHING;
                     """, (passagier_id, gepaeck_id))
 
-        # 31. bucht (Buchungsklasse ~ '^[A-Z]$', BuchungsStatus IN, SitzplatzNummer ~ '^[0-9]{1,2}[A-Z]$')
+        # bucht
         print("  - bucht...")
         for passagier_id in pks['Passagier']:
             for _ in range(random.randint(1, 2)):
@@ -411,7 +410,7 @@ def insert_data():
                     ON CONFLICT (PassagierID, FlugID) DO NOTHING;
                 """, (passagier_id, flug_id, fake.uuid4(), buchungsklasse, random.choice(['Gebucht', 'Bestätigt', 'Annuliert']), sitzplatz_nummer))
 
-        # 32. arbeitetAn (MitarbeiterStatus IN)
+        # arbeitetAn (MitarbeiterStatus IN)
         print("  - arbeitetAn...")
         for mitarbeiter_id in pks['Mitarbeiter']:
             iata_code = get_random_pk('Flughafen')
@@ -423,7 +422,7 @@ def insert_data():
                 ON CONFLICT (MitarbeiterID, IATACode) DO NOTHING;
             """, (mitarbeiter_id, iata_code.strip(), random.choice(['Anwesend', 'Remote', 'Krank', 'Urlaub', 'Entlassen']), beginn, ende, fake.job()))
 
-        # 33. StellflaecheIstBesetztVon & 34. LadenflaecheIstBesetztVon (Nutzungsende > Nutzungsbeginn)
+        # StellflaecheIstBesetztVon & LadenflaecheIstBesetztVon
         print("  - StellflaecheIstBesetztVon & LadenflaecheIstBesetztVon...")
         for flaeche_nutzer_id in pks['Flaechennutzer']:
             for _ in range(random.randint(1, 3)):
@@ -447,7 +446,7 @@ def insert_data():
                             ON CONFLICT (LadenflaecheID, FlaechennutzerID) DO NOTHING;
                         """, (ladenflaeche_id, flaeche_nutzer_id, start, ende))
 
-        # 35. wirdVermarktetVon
+        # wirdVermarktetVon
         print("  - wirdVermarktetVon...")
         for flug_id in pks['Flug']:
             airline_code_executing = get_random_pk('Airline')
@@ -466,11 +465,11 @@ def insert_data():
                         ON CONFLICT (IATACode, FlugID) DO NOTHING;
                     """, (airline_code_marketing.strip(), flug_id, False))
                     
-        # 36. betreibtIn & 37-42 IstTeilVon Relationen
+        # betreibtIn & IstTeilVon Relationen
         print("  - IstTeilVon Relationen (betreibtIn, parking, piste, terminal, fahrzeug, ladenflaeche, stellflaeche)...")
         for flughafen_iata in pks['Flughafen']:
             
-            # betreibtIn & terminalIstTeilVon (Terminals werden von Flughafen betrieben)
+            # betreibtIn & terminalIstTeilVon
             for _ in range(random.randint(1, 3)): 
                 terminal_id = get_random_pk('Terminal')
                 if terminal_id:
@@ -538,10 +537,10 @@ def insert_data():
 
         # Transaktion abschliessen
         conn.commit()
-        print("\n✅ Daten wurden erfolgreich generiert und in die Datenbank eingefügt.")
+        print("\nDaten wurden erfolgreich generiert und in die Datenbank eingefügt.")
 
     except (Exception, psycopg2.Error) as error:
-        print(f"\n❌ Fehler beim Einfügen der Daten: {error}")
+        print(f"\nFehler beim Einfügen der Daten: {error}")
         if conn:
             conn.rollback()
     finally:
