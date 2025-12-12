@@ -5,7 +5,7 @@ from faker import Faker
 from datetime import datetime, timedelta
 
 # --- 1. Datenbank-Konfiguration (BITTE ANPASSEN) ---
-DB_NAME = "postgres"
+DB_NAME = "airportmanagementsystem"
 DB_USER = "thierrysuhner" 
 DB_PASSWORD = "1234"      
 DB_HOST = "localhost"
@@ -43,6 +43,16 @@ def get_random_pk(table_name):
         return None 
     return random.choice(pks[table_name])
 
+def normalize(text):
+    replacements = {
+        'ä': 'ae', 'ö': 'oe', 'ü': 'ue',
+        'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue',
+        'ß': 'ss'
+    }
+    for src, tgt in replacements.items():
+        text = text.replace(src, tgt)
+    return text
+
 # --- 3. Verbindung und Datenimport ---
 
 def insert_data():
@@ -62,8 +72,8 @@ def insert_data():
         print("  - Airline...")
         for _ in range(NUM_ROWS):
             iata = generate_airport_iata_code(iata_codes)  # benutzt die Funktion
-            name = fake.company().encode('ascii', errors='ignore').decode('ascii')
-            land = fake.country().encode('ascii', errors='ignore').decode('ascii')
+            name = normalize(fake.company()).encode('ascii', errors='ignore').decode('ascii')
+            land = normalize(fake.country()).encode('ascii', errors='ignore').decode('ascii')
             cur.execute("""
                 INSERT INTO Airline (IATACode, Name, Ursprungsland) 
                 VALUES (%s, %s, %s) 
@@ -105,9 +115,9 @@ def insert_data():
         print("  - Flughafen...")
         for _ in range(NUM_ROWS):
             iata = generate_airport_iata_code(iata_codes)
-            name = (fake.city_name() + ' International Airport').encode('ascii', errors='ignore').decode('ascii')
-            land = fake.country().encode('ascii', errors='ignore').decode('ascii')
-            stadt = fake.city().encode('ascii', errors='ignore').decode('ascii')
+            name = (normalize(fake.city_name()) + ' International Airport').encode('ascii', errors='ignore').decode('ascii')
+            land = normalize(fake.country()).encode('ascii', errors='ignore').decode('ascii')
+            stadt = normalize(fake.city()).encode('ascii', errors='ignore').decode('ascii')
 
             cur.execute("""
                 INSERT INTO Flughafen (IATACode, Name, Land, Stadt) 
@@ -166,7 +176,7 @@ def insert_data():
                 INSERT INTO Mitarbeiter (Vorname, Nachname, Geburtsdatum, Strasse, Postleitzahl, Ort) 
                 VALUES (%s, %s, %s, %s, %s, %s) 
                 RETURNING MitarbeiterID;
-            """, (fake.first_name(), fake.last_name(), fake.date_of_birth(minimum_age=20, maximum_age=65), fake.street_address(), fake.postcode(), fake.city()))
+            """, (normalize(fake.first_name()), normalize(fake.last_name()), fake.date_of_birth(minimum_age=20, maximum_age=65), fake.street_address(), fake.postcode(), fake.city()))
             pks['Mitarbeiter'].append(cur.fetchone()[0])
             
         # 11. Flaechennutzer
@@ -176,7 +186,7 @@ def insert_data():
                 INSERT INTO Flaechennutzer (Name, FlaechennutzerKategorie, Strasse, Postleitzahl, Ort, KontaktTelefonnummer) 
                 VALUES (%s, %s, %s, %s, %s, %s) 
                 RETURNING FlaechennutzerID;
-            """, (fake.company(), random.choice(['Airline', 'Retail', 'Service', 'Gastro']), fake.street_address(), fake.postcode(), fake.city(), fake.phone_number()))
+            """, (normalize(fake.company()), random.choice(['Airline', 'Retail', 'Service', 'Gastro']), fake.street_address(), fake.postcode(), fake.city(), fake.phone_number()))
             pks['Flaechennutzer'].append(cur.fetchone()[0])
             
         # 12. Fahrzeug (Herstellungsjahr ~ '^[0-9]{4}$', FahrzeugStatus IN)
