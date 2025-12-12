@@ -10,7 +10,7 @@ DB_USER = "thierrysuhner"
 DB_PASSWORD = "1234"      
 DB_HOST = "localhost"
 DB_PORT = "5432"
-NUM_ROWS = 75
+NUM_ROWS = 200
 
 # Faker initialisieren, z.B. für deutsche Daten
 fake = Faker('de_DE')
