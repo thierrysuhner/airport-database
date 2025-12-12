@@ -4,13 +4,13 @@ Dieses Repository enthält alle nötigen SQL-Anweisungen sowie Python-Skripts, u
 
 ```bash
 ├── README.md
-├── database_creation_entities.ipynb # Beinhaltet CREATE TABLE Anweisungen, um Entitäts-Tabellen zu erstellen in der Datenbank
+├── database_creation_entities.ipynb  # Beinhaltet CREATE TABLE Anweisungen, um Entitäts-Tabellen zu erstellen in der Datenbank
 ├── database_creation_relations.ipynb # Enthält CREATE TABLE Anweisungen, um Relations-Tabellen zu erstellen in der Datenbank
-├── faker-data.py # Enthält Python-Skript, um Dummy-Daten in die Datenbank einzufügen
-└── functionality_queries.ipynb # Beinhaltet Queries, um die Funktionalität und Use Cases der Datenbank zu testen
+├── faker-data.py                     # Enthält Python-Skript, um Dummy-Daten in die Datenbank einzufügen
+└── functionality_queries.ipynb       # Beinhaltet Queries, um die Funktionalität und Use Cases der Datenbank zu testen
 ```
 
-# Running Insructions
+# Running Instructions
 Um die Datenbank erstellen zu können, muss in den Jupyter-Notebooks sowie im Python-Script jeweils die Konfguration von PostgreSQL angepasst werden.
 
 ### Jupyter Notebooks
@@ -23,11 +23,11 @@ In unserem Fall haben wir `airportmanagementsystem` als Namen für unsere Datenb
 ### Python-Skript
 ```bash
 DB_NAME = "airportmanagementsystem" # Namen der Datenbank
-DB_USER = "thierrysuhner" # Benutzername des Users
-DB_PASSWORD = "1234"      # Passwort des Users
-DB_HOST = "localhost"     # Hostname der Datenbank
-DB_PORT = "5432"          # Port der Datenbank
-NUM_ROWS = 200            # Anzahl der Zeilen mit Beispiel-Daten
+DB_USER = "thierrysuhner"           # Benutzername des Users
+DB_PASSWORD = "1234"                # Passwort des Users
+DB_HOST = "localhost"               # Hostname der Datenbank
+DB_PORT = "5432"                    # Port der Datenbank
+NUM_ROWS = 200                      # Anzahl der Zeilen mit Beispiel-Daten
 ```
 
 Diese Parameter müssen ähnlich wie im Jupyter-Notebook ganz zuoberst im Python-Skript angepasst werden, damit das Skript einwandfrei laufen kann.
